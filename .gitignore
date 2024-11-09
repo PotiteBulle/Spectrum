@@ -1,0 +1,29 @@
+# Ignorer les fichiers de configuration et les variables d'environnement
+.env
+
+# Ignorer les dossiers de dépendances pour Bun et Node.js
+bun.lockb
+node_modules/
+
+# Ignorer les fichiers de sortie de compilation (si vous utilisez TypeScript ou autres compilateurs)
+dist/
+build/
+out/
+
+# Ignorer les fichiers de logs et temporaires
+*.log
+logs/
+*.tmp
+*.temp
+
+# Ignorer les fichiers spécifiques à l'éditeur ou au système
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+*.iml
+
+# Ignorer les dossiers de bannissements s'ils contiennent des données sensibles
+Bannissements/
