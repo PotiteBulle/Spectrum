@@ -4,6 +4,9 @@ import { watch } from 'node:fs';
 import * as path from 'node:path';
 import * as dotenv from 'dotenv';
 
+// Importation du type WatchOptions de manière correcte
+import type { WatchOptions, WatchListener } from 'node:fs';
+
 // Charger les variables d'environnement depuis le fichier .env
 dotenv.config();
 
@@ -40,8 +43,14 @@ async function banMemberIfNecessary(member: GuildMember, reason: string): Promis
 client.once(Events.ClientReady, async () => {
     console.log(`Connecté en tant que ${client.user?.tag}`);
     
+    // Vérifier que GUILD_ID est bien défini avant d'utiliser la variable
+    const guildId = GUILD_ID;
+    if (!guildId) {
+        throw new Error('La variable d\'environnement GUILD_ID doit être définie.');
+    }
+
     // Charger les listes de bannissement et bannir immédiatement les membres déjà dans le serveur
-    await refreshBanListsAndBanMembers();
+    await refreshBanListsAndBanMembers(guildId);
 
     // Surveiller les modifications dans le dossier de bannissement
     watchBanListsDirectory();
@@ -57,27 +66,32 @@ client.on(Events.GuildMemberAdd, async (member: GuildMember) => {
         await banMemberIfNecessary(member, reason);
     }
 
-    console.log(`Membre ${member.user.tag} est autorisé à rester.`);
 });
 
 // Fonction pour charger toutes les listes de bannissement depuis le dossier
-async function refreshBanListsAndBanMembers(): Promise<void> {
+async function refreshBanListsAndBanMembers(guildId: string): Promise<void> {
     try {
-        const files = await fs.readdir(BANNISSEMENTS_DIR!);
+        if (!BANNISSEMENTS_DIR) {
+            throw new Error('Le chemin du dossier de bannissement n\'est pas défini.');
+        }
+
+        const files = await fs.readdir(BANNISSEMENTS_DIR);
         const newBanLists: Map<string, Set<string>> = new Map();
 
         for (const file of files) {
-            const filePath = path.join(BANNISSEMENTS_DIR!, file);
+            const filePath = path.join(BANNISSEMENTS_DIR, file);
             const data = await fs.readFile(filePath, 'utf8');
             const ids = new Set(data.split('\n').map(id => id.trim()).filter(id => id.length > 0));
-
-            // Utiliser le nom de fichier sans l'extension comme motif de bannissement
             const reason = path.basename(file, path.extname(file)); 
             newBanLists.set(reason, ids);
         }
 
-        // Bannir les membres du serveur qui sont dans une des listes
-        const guild = await client.guilds.fetch(GUILD_ID!);
+        // Vérifier que GUILD_ID est bien défini avant de l'utiliser
+        if (!guildId) {
+            throw new Error('La variable d\'environnement GUILD_ID est invalide.');
+        }
+
+        const guild = await client.guilds.fetch(guildId);
         const members = await guild.members.fetch();
 
         for (const member of members.values()) {
@@ -97,12 +111,22 @@ async function refreshBanListsAndBanMembers(): Promise<void> {
 
 // Fonction pour surveiller les modifications dans le dossier
 function watchBanListsDirectory() {
-    watch(BANNISSEMENTS_DIR!, { recursive: true }, async (eventType, filename) => {
+    if (!BANNISSEMENTS_DIR) {
+        throw new Error('Le dossier de bannissement n\'est pas défini.');
+    }
+
+    const watchOptions: WatchOptions = { encoding: 'utf8' };
+
+    // Ajouter les types manquants pour `eventType` et `filename`
+    const listener: WatchListener<string | Buffer> = (eventType, filename) => {
         if (eventType === 'change' && filename) {
             console.log(`Modification détectée dans le fichier de bannissement : ${filename}`);
-            await refreshBanListsAndBanMembers();
+            // Recharger les listes de bannissement et bannir les membres
+            refreshBanListsAndBanMembers(GUILD_ID!);
         }
-    });
+    };
+
+    watch(BANNISSEMENTS_DIR, watchOptions, listener);
 }
 
 // Connexion du client Discord avec le Bot via le Token
