@@ -99,3 +99,6 @@ Les contributions sont les bienvenues ! Veuillez ouvrir une issue ou faire une p
 ## Support
 
 Pour toute question ou assistance, n'hésitez pas à ouvrir une issue.
+
+## Mise en place d'un bot discord (Tuto): 
+- Les informations détaillées se trouvent ici : [Bot Discord](https://leptitbot.com/comment-creer-un-bot-discord-2024/)
