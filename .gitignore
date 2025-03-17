@@ -1,14 +1,20 @@
 # Ignorer les fichiers de configuration et les variables d'environnement
 .env
+.env.local
+.env.development
+.env.production
 
 # Ignorer les dossiers de dépendances pour Bun et Node.js
 bun.lockb
 node_modules/
+package-lock.json
+yarn.lock
 
-# Ignorer les fichiers de sortie de compilation (si vous utilisez TypeScript ou autres compilateurs)
+# Ignorer les fichiers de sortie de compilation (TypeScript ou autres compilateurs)
 dist/
 build/
 out/
+*.tsbuildinfo
 
 # Ignorer les fichiers de logs et temporaires
 *.log
@@ -27,3 +33,7 @@ Thumbs.db
 
 # Ignorer les dossiers de bannissements s'ils contiennent des données sensibles
 Bannissements/
+
+# Ignorer les fichiers de cache de test
+coverage/
+.nyc_output/
