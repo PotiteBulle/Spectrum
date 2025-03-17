@@ -5,6 +5,7 @@
 .env.production
 
 # Ignorer les dossiers de dépendances pour Bun et Node.js
+bun.lock
 bun.lockb
 node_modules/
 package-lock.json
